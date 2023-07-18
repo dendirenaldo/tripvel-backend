@@ -1,0 +1,33 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+
+export class InsertBeritaDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    judul: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    deskripsi: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    isi: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsNumber()
+    @Transform(({ value }) => typeof value === 'string' ? +value : value)
+    waktuMembaca: number;
+
+    @ApiProperty({
+        type: 'string',
+        format: 'binary',
+        required: true
+    })
+    gambar: Express.Multer.File;
+}
