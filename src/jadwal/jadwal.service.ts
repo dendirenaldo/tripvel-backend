@@ -144,8 +144,14 @@ export class JadwalService {
         };
         const jumlahData: any = await this.jadwalRepository.sequelize.query(`
         SELECT 
-            COUNT(jadwal.id) AS jumlah
+            COUNT(jadwal.id) AS jumlah,
+            COUNT(transaksi_list.id) AS jumlahTerpesan,
+            mobil.jumlah_penumpang AS \`mobil.jumlahPenumpang\`
         FROM jadwal
+        LEFT JOIN transaksi
+            ON jadwal.id = transaksi.jadwal_id
+        LEFT JOIN transaksi_list
+            ON transaksi.id = transaksi_list.transaksi_id
         JOIN travel
             ON jadwal.travel_id = travel.id
         JOIN mobil
@@ -155,6 +161,7 @@ export class JadwalService {
         JOIN tujuan AS tujuan
             ON jadwal.tujuan_id = tujuan.id
         ${where.length > 0 ? 'WHERE ' + where.join(' AND ') : ''}
+        GROUP BY jadwal.id
         ${having.length > 0 ? 'HAVING ' + having.join(' AND ') : ''}
                 `, { type: QueryTypes.SELECT })
         return {
