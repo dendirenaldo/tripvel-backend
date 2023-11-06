@@ -84,7 +84,7 @@ export class AccountController {
         ],
         fileIsRequired: false,
     })) gambar?: Express.Multer.File) {
-        if (user.role === 'Superadmin' || user.role === 'Admin') {
+        if (user.role === 'Admin' || (user.role === 'Travel' && (data.role === RoleType.Travel || data.role === RoleType.Supir)) && data.travelId === user.travelId) {
             return this.accountService.create(data, gambar?.filename);
         } else {
             throw new ForbiddenException('Only administrator can access this endpoint.')
@@ -149,7 +149,7 @@ export class AccountController {
         ],
         fileIsRequired: false,
     })) gambar?: Express.Multer.File) {
-        if (user.role === 'Superadmin' || user.role === 'Admin') {
+        if (user.role === 'Admin' || (user.role === 'Travel' && (data.role === RoleType.Travel || data.role === RoleType.Supir)) && data.travelId === user.travelId) {
             return this.accountService.update(+id, data, gambar?.filename);
         } else {
             throw new ForbiddenException('Only administrator can access this endpoint.')
