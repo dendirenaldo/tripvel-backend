@@ -166,7 +166,7 @@ export class JadwalService {
                 `, { type: QueryTypes.SELECT })
         return {
             data: convertedData(jadwal),
-            totalData: jumlahData[0]?.jumlah,
+            totalData: jumlahData.length,
             totalRow: jadwal.length
         }
     }
