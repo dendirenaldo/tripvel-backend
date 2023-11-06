@@ -31,7 +31,7 @@ export class MailService {
             }, { where: { email } });
         }
 
-        const url = `${this.configService.get<string>('PRODUCTION') === 'true' ? 'https://backend.tripvel.com' : 'http://localhost:3000'}/account/email-verification/${token}`;
+        const url = `${this.configService.get<string>('PRODUCTION') === 'true' ? 'https://tripvel.dendirenaldo.com' : 'http://localhost:3000'}/account/email-verification/${token}`;
         return await this.mailerService.sendMail({
             to: auth.email,
             from: `"${this.configService.get<string>('MAIL_NAME')}" <${this.configService.get<string>('MAIL_USER')}>`,
@@ -68,7 +68,7 @@ export class MailService {
             })
         }
 
-        const url = `${this.configService.get<string>('PRODUCTION') === 'true' ? 'https://backend.tripvel.com' : 'http://localhost:3000'}/reset_password?token=${token}`;
+        const url = `${this.configService.get<string>('PRODUCTION') === 'true' ? 'https://tripvel.dendirenaldo.com' : 'http://localhost:3000'}/reset_password?token=${token}`;
         return await this.mailerService.sendMail({
             to: auth.email,
             from: `"${this.configService.get<string>('MAIL_NAME')}" <${this.configService.get<string>('MAIL_USER')}>`,

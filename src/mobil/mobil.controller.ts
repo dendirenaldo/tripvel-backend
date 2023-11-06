@@ -10,16 +10,27 @@ import { AuthGuard } from '@nestjs/passport';
 export class MobilController {
     constructor(private mobilService: MobilService) { }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get()
-    findAll(@Query() query: QueryMobilDto) {
-        return this.mobilService.findAll(query);
+    findAll(@Query() query: QueryMobilDto, @Req() { user }: any) {
+        if (user.role === 'Admin' || user.role === 'Travel') {
+            return this.mobilService.findAll(query, user);
+        } else {
+            throw new ForbiddenException('Only administrator or travel can access this endpoint.');
+        }
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':id')
+    findOne(@Param('id') id: string,) {
+        return this.mobilService.findOne(+id);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Patch()
     create(@Body() data: InsertMobilDto, @Req() { user }: any) {
-        if (user.role === 'Admin') {
-            return this.mobilService.create(data);
+        if (user.role === 'Admin' || user.role === 'Travel') {
+            return this.mobilService.create(data, user);
         } else {
             throw new ForbiddenException('Only administrator can access this endpoint.');
         }
@@ -27,9 +38,9 @@ export class MobilController {
 
     @UseGuards(AuthGuard('jwt'))
     @Put(':id')
-    update(@Param() @Body() data: InsertMobilDto, @Req() { user }: any) {
-        if (user.role === 'Admin') {
-            return this.mobilService.create(data);
+    update(@Param('id') id: string, @Body() data: InsertMobilDto, @Req() { user }: any) {
+        if (user.role === 'Admin' || user.role === 'Travel') {
+            return this.mobilService.update(+id, data, user);
         } else {
             throw new ForbiddenException('Only administrator can access this endpoint.');
         }

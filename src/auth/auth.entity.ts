@@ -5,6 +5,8 @@ import { ResetPassword } from './reset-password.entity';
 import { JenisKelaminType } from 'src/general/jenis-kelamin.type';
 import { Berita } from 'src/berita/berita.entity';
 import { Travel } from 'src/travel/travel.entity';
+import { Jadwal } from 'src/jadwal/jadwal.entity';
+import { Transaksi } from 'src/transaksi/transaksi.entity';
 
 @Table({
     tableName: 'auth'
@@ -24,21 +26,6 @@ export class Auth extends Model<Auth>  {
         field: 'travel_id'
     })
     travelId?: number;
-
-    @Column({
-        type: DataType.BIGINT,
-        unique: true,
-        allowNull: true
-    })
-    nik?: number;
-
-    @Column({
-        type: new DataType.STRING(191),
-        unique: true,
-        allowNull: true,
-        field: 'hardware_id'
-    })
-    hardwareId?: string;
 
     @Column({
         type: DataType.BIGINT,
@@ -84,18 +71,23 @@ export class Auth extends Model<Auth>  {
     nomorPonsel?: number;
 
     @Column({
-        type: DataType.DATEONLY,
-        allowNull: true,
-        field: 'tanggal_lahir'
-    })
-    tanggalLahir?: Date;
-
-    @Column({
         type: DataType.ENUM(JenisKelaminType.LakiLaki, JenisKelaminType.Perempuan),
         allowNull: true,
         field: 'jenis_kelamin'
     })
     jenisKelamin?: JenisKelaminType;
+
+    @Column({
+        type: DataType.DOUBLE,
+        allowNull: true
+    })
+    latitude?: number;
+
+    @Column({
+        type: DataType.DOUBLE,
+        allowNull: true
+    })
+    longitude?: number;
 
     @Column({
         type: new DataType.STRING(191),
@@ -142,5 +134,11 @@ export class Auth extends Model<Auth>  {
     resetPassword: ResetPassword
 
     @HasMany(() => Berita)
-    berita?: Berita;
+    berita?: Berita[];
+
+    @HasMany(() => Jadwal)
+    jadwal: Jadwal[];
+
+    @HasMany(() => Transaksi)
+    transaksi?: Transaksi[];
 }

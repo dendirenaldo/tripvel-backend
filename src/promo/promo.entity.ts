@@ -1,6 +1,7 @@
 
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { PromoList } from './promo-list.entity';
+import { Transaksi } from 'src/transaksi/transaksi.entity';
 
 @Table({
     tableName: 'promo'
@@ -55,4 +56,7 @@ export class Promo extends Model<Promo>  {
 
     @HasMany(() => PromoList)
     promoList?: PromoList;
+
+    @HasMany(() => Transaksi)
+    transaksi?: Transaksi;
 }

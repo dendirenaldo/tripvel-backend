@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
-import { RoleType } from "src/general/role.type";
+import { Transform } from "class-transformer";
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { JenisKelaminType } from "src/general/jenis-kelamin.type";
 
 export class RegisterDto {
     @ApiProperty()
@@ -13,13 +14,19 @@ export class RegisterDto {
     @IsString()
     password: string;
 
-    @ApiProperty({ enum: RoleType })
-    @IsNotEmpty()
-    @IsEnum(RoleType)
-    role: RoleType;
-
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
     namaLengkap: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsNumber()
+    @Transform(({ value }) => typeof value === 'string' ? +value : value)
+    nomorPonsel: number;
+
+    @ApiProperty({ enum: JenisKelaminType })
+    @IsNotEmpty()
+    @IsEnum(JenisKelaminType)
+    jenisKelamin: JenisKelaminType;
 }

@@ -11,6 +11,11 @@ import { KonfigurasiModule } from './konfigurasi/konfigurasi.module';
 import { TravelModule } from './travel/travel.module';
 import { TujuanModule } from './tujuan/tujuan.module';
 import { PromoModule } from './promo/promo.module';
+import { JadwalModule } from './jadwal/jadwal.module';
+import { BankAccountModule } from './bank-account/bank-account.module';
+import { TransaksiModule } from './transaksi/transaksi.module';
+import { BantuanModule } from './bantuan/bantuan.module';
+import { MobilModule } from './mobil/mobil.module';
 
 @Module({
   imports: [
@@ -22,13 +27,18 @@ import { PromoModule } from './promo/promo.module';
     MailModule,
     AuthModule,
     AccountModule,
+    BantuanModule,
     DatabaseModule,
     KategoriModule,
     BeritaModule,
     KonfigurasiModule,
     TujuanModule,
     TravelModule,
-    PromoModule
+    PromoModule,
+    MobilModule,
+    JadwalModule,
+    BankAccountModule,
+    TransaksiModule,
   ],
 })
 export class AppModule { }

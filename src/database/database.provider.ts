@@ -3,14 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
 import { Auth } from 'src/auth/auth.entity';
 import { ResetPassword } from 'src/auth/reset-password.entity';
+import { BankAccount } from 'src/bank-account/bank-account.entity';
 import { Bantuan } from 'src/bantuan/bantuan.entity';
 import { Berita } from 'src/berita/berita.entity';
+import { Jadwal } from 'src/jadwal/jadwal.entity';
 import { Kategori } from 'src/kategori/kategori.entity';
-// import { Isu } from 'src/isu/isu.entity';
 import { Konfigurasi } from 'src/konfigurasi/konfigurasi.entity';
 import { Mobil } from 'src/mobil/mobil.entity';
 import { PromoList } from 'src/promo/promo-list.entity';
 import { Promo } from 'src/promo/promo.entity';
+import { TransaksiList } from 'src/transaksi/transaksi-list.entity';
+import { Transaksi } from 'src/transaksi/transaksi.entity';
 import { Travel } from 'src/travel/travel.entity';
 import { Tujuan } from 'src/tujuan/tujuan.entity';
 
@@ -31,7 +34,7 @@ export const databaseProviders = [
                 },
                 timezone: 'Asia/Jakarta'
             });
-            sequelize.addModels([Auth, ResetPassword, Kategori, Berita, Bantuan, Konfigurasi, Travel, Tujuan, Promo, PromoList, Mobil]);
+            sequelize.addModels([Auth, ResetPassword, Kategori, Berita, Bantuan, Konfigurasi, Travel, Tujuan, Promo, PromoList, Mobil, Jadwal, BankAccount, Transaksi, TransaksiList]);
             await sequelize.sync();
             return sequelize;
         },

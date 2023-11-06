@@ -25,7 +25,7 @@ async function bootstrap() {
     }
   }))
   const config = new DocumentBuilder()
-    .setTitle('Calegmu RESTful API')
+    .setTitle('Tripvel RESTful API')
     .setDescription('This is RESTful API server for data transaction into website or mobile apps with NestJS')
     .setVersion('0.1')
     .addBearerAuth()

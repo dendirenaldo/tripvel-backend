@@ -37,4 +37,10 @@ export class QueryMobilDto {
     @IsOptional()
     @IsString()
     search?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsNumber()
+    @Transform(({ value }) => typeof value == 'string' ? +value : value)
+    travelId?: number;
 }

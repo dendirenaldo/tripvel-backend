@@ -1,5 +1,6 @@
 import { Column, DataType, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 import { Auth } from 'src/auth/auth.entity';
+import { Jadwal } from 'src/jadwal/jadwal.entity';
 import { Mobil } from 'src/mobil/mobil.entity';
 
 @Table({
@@ -57,4 +58,7 @@ export class Travel extends Model<Travel>  {
 
     @HasMany(() => Mobil)
     mobil: Mobil[];
+
+    @HasMany(() => Jadwal)
+    jadwal: Jadwal[];
 }

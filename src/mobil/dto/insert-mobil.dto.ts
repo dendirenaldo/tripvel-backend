@@ -28,4 +28,10 @@ export class InsertMobilDto {
     @IsNotEmpty()
     @IsString()
     warna: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsNumber()
+    @Transform(({ value }) => typeof value === 'string' ? +value : value)
+    jumlahPenumpang: number;
 }

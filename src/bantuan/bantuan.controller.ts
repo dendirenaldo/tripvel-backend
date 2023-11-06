@@ -43,7 +43,11 @@ export class BantuanController {
 
     @UseGuards(AuthGuard('jwt'))
     @Delete(':id')
-    delete(@Param('id') id: string) {
-        return this.bantuanService.delete(+id);
+    delete(@Param('id') id: string, @Req() { user }: any) {
+        if (user.role === 'Admin') {
+            return this.bantuanService.delete(+id);
+        } else {
+            throw new ForbiddenException('Only administrator can access this endpoint.')
+        }
     }
 }

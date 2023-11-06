@@ -9,6 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, map } from 'rxjs';
 import * as fs from 'fs';
 import { MailService } from 'src/mail/mail.service';
+import { RoleType } from 'src/general/role.type';
 
 @Injectable()
 export class AuthService {
@@ -84,7 +85,8 @@ export class AuthService {
                 email: data.email,
                 googleId: data.id,
                 namaLengkap,
-                gambar: fileName
+                gambar: fileName,
+                role: RoleType.Pelanggan
             }, { raw: true })
             return this.signToken(user.id, user.email);
         } else {
@@ -104,6 +106,7 @@ export class AuthService {
         try {
             const user: Auth = await this.authRepository.create({
                 ...data,
+                role: RoleType.Pelanggan,
                 password: password_hash,
             })
             delete user.password

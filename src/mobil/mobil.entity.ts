@@ -1,4 +1,5 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import { Jadwal } from 'src/jadwal/jadwal.entity';
 import { Travel } from 'src/travel/travel.entity';
 
 @Table({
@@ -7,7 +8,8 @@ import { Travel } from 'src/travel/travel.entity';
 export class Mobil extends Model<Mobil>  {
     @Column({
         type: DataType.INTEGER.UNSIGNED,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true,
     })
     id: number;
 
@@ -45,6 +47,13 @@ export class Mobil extends Model<Mobil>  {
     warna: string;
 
     @Column({
+        type: DataType.INTEGER,
+        allowNull: false,
+        field: 'jumlah_penumpang'
+    })
+    jumlahPenumpang: number;
+
+    @Column({
         type: DataType.DATE,
         allowNull: false,
         field: 'created_at'
@@ -63,4 +72,7 @@ export class Mobil extends Model<Mobil>  {
         onDelete: 'RESTRICT'
     })
     travel: Travel;
+
+    @HasMany(() => Jadwal)
+    jadwal: Jadwal[];
 }

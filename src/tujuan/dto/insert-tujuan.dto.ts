@@ -24,4 +24,16 @@ export class InsertTujuanDto {
     @IsNumber()
     @Transform(({ value }) => typeof value === 'string' ? parseFloat(value) : value)
     longitude: number;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    deskripsi: string;
+
+    @ApiProperty({
+        type: 'string',
+        format: 'binary',
+        required: true
+    })
+    gambar: Express.Multer.File;
 }

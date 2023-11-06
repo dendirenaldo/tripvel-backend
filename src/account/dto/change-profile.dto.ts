@@ -15,11 +15,6 @@ export class ChangeProfileDto {
     @Transform(({ value }) => typeof value === 'string' ? +value : value)
     nomorPonsel: number;
 
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsDateString()
-    tanggalLahir: Date;
-
     @ApiProperty({ enum: JenisKelaminType })
     @IsNotEmpty()
     @IsEnum(JenisKelaminType)

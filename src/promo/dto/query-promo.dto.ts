@@ -1,7 +1,6 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
 import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
-import { DapilStateStructureType } from "src/general/dapil-state-structure.type";
 
 class OrderDto {
     @ApiPropertyOptional({ enum: ['judul', 'deskripsi', 'tanggalBerlaku', 'minimalHarga'] })

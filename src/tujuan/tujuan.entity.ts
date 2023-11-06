@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import { Jadwal } from 'src/jadwal/jadwal.entity';
 
 @Table({
     tableName: 'tujuan'
@@ -6,7 +7,8 @@ import { Column, DataType, Model, Table } from 'sequelize-typescript';
 export class Tujuan extends Model<Tujuan>  {
     @Column({
         type: DataType.INTEGER.UNSIGNED,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true,
     })
     id: number;
 
@@ -37,6 +39,18 @@ export class Tujuan extends Model<Tujuan>  {
     longitude: number;
 
     @Column({
+        type: DataType.TEXT,
+        allowNull: false
+    })
+    deskripsi: string;
+
+    @Column({
+        type: new DataType.STRING(191),
+        allowNull: false
+    })
+    gambar: string;
+
+    @Column({
         type: DataType.DATE,
         allowNull: false,
         field: 'created_at'
@@ -49,4 +63,14 @@ export class Tujuan extends Model<Tujuan>  {
         field: 'updated_at'
     })
     updatedAt: string;
+
+    @HasMany(() => Jadwal, {
+        foreignKey: 'asalId'
+    })
+    asal: Jadwal[];
+
+    @HasMany(() => Jadwal, {
+        foreignKey: 'tujuanId'
+    })
+    tujuan: Jadwal[];
 }

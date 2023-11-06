@@ -3,6 +3,7 @@ import { Travel } from './travel.entity';
 import { InsertTravelDto, QueryTravelDto, UpdateTravelDto } from './dto';
 import { Op } from 'sequelize';
 import { FindAllTravelInterface } from './interface';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class TravelService {
@@ -16,7 +17,7 @@ export class TravelService {
             ...(query?.offset && { offset: query?.offset }),
             ...(query?.limit && { limit: query?.limit }),
             ...(query.order ? {
-                order: [[query.order.index, query.order.order]]
+                order: [[Array.isArray(query.order.index) ? Sequelize.col(query.order.index.join('.')) : query.order.index, query.order.order]]
             } : {
                 order: [['createdAt', 'DESC']]
             }),
@@ -101,7 +102,11 @@ export class TravelService {
 
         if (!travel) throw new UnprocessableEntityException('Travel not found');
 
-        await this.travelRepository.destroy({ where: { id } });
-        return travel;
+        try {
+            return await this.travelRepository.destroy({ where: { id } }).then(() => travel);
+        } catch (err) {
+            if (err.name === 'SequelizeForeignKeyConstraintError') throw new UnprocessableEntityException('Travel ini sudah terdapat mobil atau jadwal, sehingga travel ini tidak dapat dihapuskan!');
+        }
+
     }
 }

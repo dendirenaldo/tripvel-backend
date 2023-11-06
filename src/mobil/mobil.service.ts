@@ -3,6 +3,8 @@ import { Mobil } from './mobil.entity';
 import { InsertMobilDto, QueryMobilDto } from './dto';
 import { Op } from 'sequelize';
 import { FindAllMobilInterface } from './interface';
+import { Sequelize } from 'sequelize-typescript';
+import { Travel } from 'src/travel/travel.entity';
 
 @Injectable()
 export class MobilService {
@@ -11,16 +13,24 @@ export class MobilService {
         private mobilRepository: typeof Mobil,
     ) { }
 
-    async findAll(query: QueryMobilDto): Promise<FindAllMobilInterface> {
+    async findAll(query: QueryMobilDto, user: any): Promise<FindAllMobilInterface> {
         const mobil = await this.mobilRepository.findAll({
+            include: [{
+                model: Travel,
+                as: 'travel',
+                attributes: ['id', 'nama']
+            }],
             ...(query?.offset && { offset: query?.offset }),
             ...(query?.limit && { limit: query?.limit }),
             ...(query.order ? {
-                order: [[query.order.index, query.order.order]]
+                order: [[Array.isArray(query.order.index) ? Sequelize.col(query.order.index.join('.')) : query.order.index, query.order.order]]
             } : {
                 order: [['createdAt', 'DESC']]
             }),
             where: {
+                ...((query.travelId || user.role === 'Travel') && {
+                    travelId: user.role === 'Travel' ? user.travelId : query.travelId,
+                }),
                 ...(query.search && {
                     [Op.or]: [{
                         merek: {
@@ -44,6 +54,9 @@ export class MobilService {
         })
         const jumlahData = await this.mobilRepository.count({
             where: {
+                ...((query.travelId || user.role === 'Travel') && {
+                    travelId: user.role === 'Travel' ? user.travelId : query.travelId,
+                }),
                 ...(query.search && {
                     [Op.or]: [{
                         merek: {
@@ -82,12 +95,20 @@ export class MobilService {
         return mobil;
     }
 
-    async create(data: InsertMobilDto): Promise<Mobil> {
-        return await this.mobilRepository.create({ ...data }).then(async (res) => await this.mobilRepository.findByPk(res.id));
+    async create(data: InsertMobilDto, user: any): Promise<Mobil> {
+        return await this.mobilRepository.create({
+            ...data,
+            ...(user.role === 'Travel' && { travelId: user.travelId })
+        }).then(async (res) => await this.mobilRepository.findByPk(res.id));
     }
 
-    async update(id: number, data: InsertMobilDto): Promise<Mobil> {
-        const mobil = await this.mobilRepository.findOne({ where: { id } });
+    async update(id: number, data: InsertMobilDto, user: any): Promise<Mobil> {
+        const mobil = await this.mobilRepository.findOne({
+            where: {
+                id,
+                ...(user.role === 'Travel' && { travelId: user.travelId })
+            }
+        });
 
         if (!mobil) throw new UnprocessableEntityException('Mobil not found');
 
@@ -101,6 +122,10 @@ export class MobilService {
 
         if (!mobil) throw new UnprocessableEntityException('Mobil not found');
 
-        return await this.mobilRepository.destroy({ where: { id } }).then(() => mobil);
+        try {
+            return await this.mobilRepository.destroy({ where: { id } }).then(() => mobil);
+        } catch (err) {
+            if (err.name === 'SequelizeForeignKeyConstraintError') throw new UnprocessableEntityException('Mobil ini sudah terdapat jadwal, sehingga mobil ini tidak dapat dihapuskan!');
+        }
     }
 }
