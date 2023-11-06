@@ -59,7 +59,7 @@ export class JadwalService {
             where = [
                 ...where,
                 `(transaksi.status_pembayaran <> 'Batal' OR transaksi.status_pembayaran IS NULL)`
-            ]
+            ];
         }
 
         if (query.filterTipe) {
@@ -73,7 +73,9 @@ export class JadwalService {
             where = [
                 ...where,
                 `jadwal.travel_id = '${user.travelId}'`
-            ]
+            ];
+
+            if (user.role === 'Supir') where.push(`jadwal.supir_id ='${user.id}'`);
         }
 
         const jadwal: Jadwal[] = await this.jadwalRepository.sequelize.query(`
