@@ -206,7 +206,12 @@ export class AccountService {
             const user: Auth = await this.authRepository.create({
                 ...filteredData,
                 password: password_hash,
-                ...(filename && { gambar: filename })
+                ...(filename && { gambar: filename }),
+                ...(data.isActive !== undefined ? {
+                    isActive: data.isActive
+                } : {
+                    isActive: false
+                })
             })
             delete user.password
             return user

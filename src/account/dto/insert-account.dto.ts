@@ -42,6 +42,12 @@ export class InsertAccountDto {
     @Transform(({ value }) => typeof value === 'string' ? parseFloat(value) : value)
     travelId?: number;
 
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsNumber()
+    @Transform(({ value }) => typeof value === 'string' ? JSON.parse(value) : value)
+    isActive?: boolean;
+
     @ApiProperty({
         type: 'string',
         format: 'binary',
