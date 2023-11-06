@@ -44,7 +44,7 @@ export class InsertAccountDto {
 
     @ApiPropertyOptional()
     @IsOptional()
-    @IsNumber()
+    @IsBoolean()
     @Transform(({ value }) => typeof value === 'string' ? JSON.parse(value) : value)
     isActive?: boolean;
 
