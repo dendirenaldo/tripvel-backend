@@ -5,6 +5,12 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 export class InsertBeritaDto {
     @ApiProperty()
     @IsNotEmpty()
+    @IsNumber()
+    @Transform(({ value }) => typeof value === 'string' ? +value : value)
+    kategoriId: number;
+
+    @ApiProperty()
+    @IsNotEmpty()
     @IsString()
     judul: string;
 

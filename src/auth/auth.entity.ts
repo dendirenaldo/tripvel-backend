@@ -137,7 +137,7 @@ export class Auth extends Model<Auth>  {
     berita?: Berita[];
 
     @HasMany(() => Jadwal)
-    jadwal: Jadwal[];
+    jadwal?: Jadwal[];
 
     @HasMany(() => Transaksi)
     transaksi?: Transaksi[];

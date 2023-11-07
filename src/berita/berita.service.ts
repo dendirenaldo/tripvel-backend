@@ -4,6 +4,8 @@ import { InsertBeritaDto, QueryBeritaDto, UpdateBeritaDto } from './dto';
 import { Auth } from 'src/auth/auth.entity';
 import { Op } from 'sequelize';
 import { FindAllBeritaInterface } from './interface';
+import { Kategori } from 'src/kategori/kategori.entity';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class BeritaService {
@@ -17,13 +19,18 @@ export class BeritaService {
             ...(query?.offset && { offset: query?.offset }),
             ...(query?.limit && { limit: query?.limit }),
             ...(query.order ? {
-                order: [[query.order.index, query.order.order]]
+                order: [[Array.isArray(query.order.index) ? Sequelize.col(query.order.index.join('.')) : query.order.index, query.order.order]]
             } : {
                 order: [['createdAt', 'DESC']]
             }),
             include: [{
                 model: Auth,
-                as: 'auth'
+                as: 'auth',
+                attributes: ['id', 'namaLengkap']
+            }, {
+                model: Kategori,
+                as: 'kategori',
+                attributes: ['id', 'nama']
             }],
             where: {
                 ...(query.search && {
@@ -32,7 +39,7 @@ export class BeritaService {
                             [Op.like]: `%${query.search}%`
                         }
                     }, {
-                        '$auth.nama_depan$': {
+                        '$auth.nama_lengkap$': {
                             [Op.like]: `%${query.search}%`
                         }
                     }]
@@ -43,7 +50,7 @@ export class BeritaService {
             include: [{
                 model: Auth,
                 as: 'auth',
-                attributes: []
+                attributes: ['id', 'namaLengkap']
             }],
             where: {
                 ...(query.search && {
@@ -52,7 +59,7 @@ export class BeritaService {
                             [Op.like]: `%${query.search}%`
                         }
                     }, {
-                        '$auth.nama_depan$': {
+                        '$auth.nama_lengkap$': {
                             [Op.like]: `%${query.search}%`
                         }
                     }]
@@ -68,7 +75,8 @@ export class BeritaService {
 
     async findOne(id: number): Promise<Berita> {
         const berita = await this.beritaRepository.findOne({
-            where: { id }, include: [{
+            where: { id },
+            include: [{
                 model: Auth,
                 as: 'auth'
             }]

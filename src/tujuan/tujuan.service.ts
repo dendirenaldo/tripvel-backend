@@ -78,8 +78,14 @@ export class TujuanService {
         }
     }
 
-    async favorit() {
-        // return await this.tujuanRepository.sequelize.query("SELECT FROM tujuan JOIN ", { type: QueryTypes.SELECT });
+    async favorit(): Promise<FindAllTujuanInterface> {
+        const data: Tujuan[] = await this.tujuanRepository.sequelize.query("SELECT tujuan.id, tujuan.nama_lengkap AS namaLengkap, tujuan.nama_singkatan AS namaSingkatan, tujuan.deskripsi, COUNT(transaksi.id) AS jumlah FROM tujuan LEFT JOIN jadwal ON tujuan.id = jadwal.tujuan_id LEFT JOIN transaksi ON transaksi.jadwal_id = jadwal.id GROUP BY tujuan.id ORDER BY jumlah DESC LIMIT 5 OFFSET 0", { type: QueryTypes.SELECT });
+        const totalData: number = await this.tujuanRepository.count();
+        return {
+            data,
+            totalData,
+            totalRow: data.length
+        }
     }
 
     async getLokasi(query: QueryGetLokasi) {

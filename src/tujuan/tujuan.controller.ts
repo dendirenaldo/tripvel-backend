@@ -29,7 +29,7 @@ export class TujuanController {
     }
 
     @Get('favorit')
-    favorit(@Param('id') id: string) {
+    favorit() {
         return this.tujuanService.favorit();
     }
 
