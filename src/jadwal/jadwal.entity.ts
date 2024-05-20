@@ -1,6 +1,7 @@
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 import { Auth } from 'src/auth/auth.entity';
 import { JadwalType } from 'src/general/jadwal.type';
+import { KursiTerisi } from 'src/kursi-terisi/kursi-terisi.entity';
 import { Mobil } from 'src/mobil/mobil.entity';
 import { Transaksi } from 'src/transaksi/transaksi.entity';
 import { Travel } from 'src/travel/travel.entity';
@@ -139,4 +140,7 @@ export class Jadwal extends Model<Jadwal>  {
 
     @HasMany(() => Transaksi)
     transaksi: Transaksi[];
+
+    @HasMany(() => KursiTerisi)
+    kursiTerisi?: KursiTerisi[];
 }

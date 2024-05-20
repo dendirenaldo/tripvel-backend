@@ -10,6 +10,9 @@ import { Jadwal } from 'src/jadwal/jadwal.entity';
 import { BankAccount } from 'src/bank-account/bank-account.entity';
 import { Travel } from 'src/travel/travel.entity';
 import { Mobil } from 'src/mobil/mobil.entity';
+import { Promo } from 'src/promo/promo.entity';
+import { Konfigurasi } from 'src/konfigurasi/konfigurasi.entity';
+import { Auth } from 'src/auth/auth.entity';
 
 @Injectable()
 export class TransaksiService {
@@ -18,7 +21,13 @@ export class TransaksiService {
         private transaksiRepository: typeof Transaksi,
 
         @Inject('TRANSAKSI_LIST_REPOSITORY')
-        private transaksiListRepository: typeof TransaksiList
+        private transaksiListRepository: typeof TransaksiList,
+
+        @Inject('PROMO_REPOSITORY')
+        private promoRepository: typeof Promo,
+
+        @Inject('KONFIGURASI_REPOSITORY')
+        private konfigurasiRepository: typeof Konfigurasi,
     ) { }
 
     async findAll(query: QueryTransaksiDto, user: any): Promise<FindAllTransaksiInterface> {
@@ -50,6 +59,13 @@ export class TransaksiService {
                 ...where,
                 `transaksi.user_id = ${user.id}`
             ]
+        } else if (user.role === 'Travel' || user.role === 'Supir') {
+            where = [
+                ...where,
+                `jadwal.travel_id = '${user.travelId}'`
+            ];
+
+            if (user.role === 'Supir') where.push(`jadwal.supir_id ='${user.id}'`);
         } else {
             if (query.userId) {
                 where = [
@@ -98,6 +114,9 @@ export class TransaksiService {
             asal.nama_lengkap AS \`jadwal.asal.namaLengkap\`,
             tujuan.nama_singkatan AS \`jadwal.tujuan.namaSingkatan\`,
             tujuan.nama_lengkap AS \`jadwal.tujuan.namaLengkap\`,
+            supir.nama_lengkap AS \`jadwal.supir.namaLengkap\`,
+            supir.latitude AS \`jadwal.supir.latitude\`,
+            supir.longitude AS \`jadwal.supir.longitude\`,
             mobil.merek AS \`jadwal.mobil.merek\`,
             mobil.model AS \`jadwal.mobil.model\`,
             mobil.plat_nomor AS \`jadwal.mobil.platNomor\`,
@@ -108,6 +127,8 @@ export class TransaksiService {
             ON transaksi.id = transaksi_list.transaksi_id
         JOIN jadwal 
             ON transaksi.jadwal_id = jadwal.id
+        LEFT JOIN auth AS supir
+            ON jadwal.supir_id = supir.id
         JOIN travel
             ON jadwal.travel_id = travel.id
         JOIN mobil
@@ -167,72 +188,6 @@ export class TransaksiService {
         }
     }
 
-    // async findAll(query: QueryTransaksiDto, user: any): Promise<FindAllTransaksiInterface> {
-    //     const userId = user.role === 'Admin' ? (query.userId ?? null) : user.id;
-    //     const transaksi = await this.transaksiRepository.findAll({
-    //         ...(query?.offset && { offset: query?.offset }),
-    //         ...(query?.limit && { limit: query?.limit }),
-    //         include: [{
-    //             model: TransaksiList,
-    //             as: 'transaksiList',
-    //             include: [{
-    //                 model: Tujuan,
-    //                 as: 'tujuan'
-    //             }]
-    //         }],
-    //         where: {
-    //             userId,
-    //             ...(query.search && {
-    //                 [Op.or]: [{
-    //                     judul: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }, {
-    //                     deskripsi: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }, {
-    //                     minimalHarga: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }, {
-    //                     tanggalBerlaku: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }]
-    //             }),
-    //         }
-    //     })
-    //     const jumlahData = await this.transaksiRepository.count({
-    //         where: {
-    //             ...(query.search && {
-    //                 [Op.or]: [{
-    //                     judul: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }, {
-    //                     deskripsi: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }, {
-    //                     minimalHarga: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }, {
-    //                     tanggalBerlaku: {
-    //                         [Op.like]: `%${query.search}%`
-    //                     }
-    //                 }]
-    //             }),
-    //         }
-    //     })
-    //     return {
-    //         data: transaksi,
-    //         totalData: jumlahData,
-    //         totalRow: transaksi.length
-    //     }
-    // }
-
     async findOne(id: number): Promise<Transaksi> {
         const transaksi = await this.transaksiRepository.findOne({
             where: { id },
@@ -258,6 +213,10 @@ export class TransaksiService {
                     model: Tujuan,
                     as: 'tujuan',
                     attributes: ['id', 'namaSingkatan', 'namaLengkap', 'latitude', 'longitude']
+                }, {
+                    model: Auth,
+                    as: 'supir',
+                    attributes: ['id', 'namaLengkap', 'latitude', 'longitude', 'gambar']
                 }]
             }, {
                 model: BankAccount,
@@ -273,10 +232,26 @@ export class TransaksiService {
 
     async create(data: InsertTransaksiDto, userId: number): Promise<Transaksi> {
         const { transaksiList, ...filteredData } = data;
+        let diskon: number = 0;
+        const biayaLayanan: number = +(await (await this.konfigurasiRepository.findByPk('biaya_layanan')).nilai);
+
+        if (filteredData.promoId) {
+            const promo: Promo = await this.promoRepository.findByPk(filteredData.promoId);
+            if (!promo) {
+                throw new UnprocessableEntityException('Promo telah habis!');
+            } else if (promo !== null && promo.minimalHarga > filteredData.harga) {
+
+            }
+
+            diskon = promo.diskon;
+        }
+
         return await this.transaksiRepository.create({
             ...filteredData,
             userId: userId,
-            statusPembayaran: filteredData.metodePembayaran === 'Tunai' ? StatusPembayaranType.Proses : StatusPembayaranType.Belum
+            statusPembayaran: filteredData.metodePembayaran === 'Tunai' ? StatusPembayaranType.Proses : StatusPembayaranType.Belum,
+            diskon,
+            biayaLayanan
         }, { raw: true }).then((res) => {
             return Promise.all(
                 transaksiList.map(async (val) => {
@@ -305,10 +280,10 @@ export class TransaksiService {
         }
     }
 
-    async batal(id: number, userId: number) {
+    async batal(id: number, user: any) {
         const transaksi = await this.findOne(id);
 
-        if (transaksi.userId === userId) {
+        if (user.role === 'Admin' || (user.role === 'Travel' && transaksi.jadwal.travelId === user.travelId) || (transaksi.userId === user.id && user.role === 'Pelanggan')) {
             return await this.transaksiRepository.update({ statusPembayaran: StatusPembayaranType.Batal }, { where: { id: id } }).then(async (res) => await this.findOne(id));
         } else {
             throw new UnprocessableEntityException('You cannot change the status!')

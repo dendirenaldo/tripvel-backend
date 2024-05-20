@@ -1,18 +1,22 @@
 import { BadRequestException, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InsertJadwalDto, QueryJadwalDto } from './dto';
-import { Order, QueryTypes } from 'sequelize';
+import { Op, Order, QueryTypes } from 'sequelize';
 import { FindAllJadwalInterface } from './interface';
 import { Jadwal } from './jadwal.entity';
 import { Transaksi } from 'src/transaksi/transaksi.entity';
 import { TransaksiList } from 'src/transaksi/transaksi-list.entity';
 import { Mobil } from 'src/mobil/mobil.entity';
 import { Tujuan } from 'src/tujuan/tujuan.entity';
+import { KursiTerisi } from 'src/kursi-terisi/kursi-terisi.entity';
 
 @Injectable()
 export class JadwalService {
     constructor(
         @Inject('JADWAL_REPOSITORY')
         private jadwalRepository: typeof Jadwal,
+
+        @Inject('KURSI_TERISI_REPOSITORY')
+        private kursiTerisiRepository: typeof KursiTerisi,
     ) { }
 
     async findAll(query: QueryJadwalDto, user: any): Promise<FindAllJadwalInterface> {
@@ -189,6 +193,9 @@ export class JadwalService {
                 model: Tujuan,
                 as: 'asal',
                 attributes: ['id', 'namaSingkatan', 'namaLengkap', 'latitude', 'longitude']
+            }, {
+                model: KursiTerisi,
+                as: 'kursiTerisi'
             }],
             where: { id }
         });
@@ -199,18 +206,46 @@ export class JadwalService {
     }
 
     async create(data: InsertJadwalDto): Promise<Jadwal> {
-        return await this.jadwalRepository.create({ ...data }, { raw: true }).then(async (res) => await this.jadwalRepository.findByPk(res.id));
+        const { kursiTerisi, ...filteredData } = data;
+        const jadwal = await this.jadwalRepository.create(filteredData, { raw: true }).then(async (res) => await this.jadwalRepository.findByPk(res.id));
+
+        if (kursiTerisi !== undefined && kursiTerisi?.length > 0) kursiTerisi.map(async (val) => {
+            await this.kursiTerisiRepository.create({
+                jadwalId: jadwal.id,
+                nomorKursi: val
+            });
+        })
+
+
+        return jadwal;
     }
 
     async update(id: number, data: InsertJadwalDto): Promise<Jadwal> {
+        const { kursiTerisi, ...filteredData } = data;
         const jadwal = await this.jadwalRepository.findOne({ where: { id } });
 
         if (!jadwal) throw new UnprocessableEntityException('Jadwal not found');
 
-        return await this.jadwalRepository.update({ ...data }, { where: { id } }).then(async () => await this.jadwalRepository.findOne({
+        const jadwalUpdated = await this.jadwalRepository.update(filteredData, { where: { id } }).then(async () => await this.jadwalRepository.findOne({
             where: { id }
         }));
 
+        await this.kursiTerisiRepository.destroy({
+            where: {
+                jadwalId: id,
+                nomorKursi: {
+                    [Op.not]: kursiTerisi.map((val) => val)
+                }
+            }
+        })
+        const kursiTerisiCurrent: KursiTerisi[] = await this.kursiTerisiRepository.findAll({ where: { jadwalId: id } });
+        const kursiTerisiCurrentArray = kursiTerisiCurrent.map((val) => val.nomorKursi);
+        const kursiTerisiArray = kursiTerisi.map((val) => val);
+        const notExists = kursiTerisiArray.filter(num => !kursiTerisiCurrentArray.includes(num));
+        notExists.map(async (val) => {
+            await this.kursiTerisiRepository.create({ jadwalId: id, nomorKursi: val })
+        })
+        return jadwalUpdated;
     }
 
     async delete(id: number): Promise<Jadwal> {

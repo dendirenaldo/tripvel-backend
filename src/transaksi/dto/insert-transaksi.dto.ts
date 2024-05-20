@@ -33,6 +33,12 @@ export class InsertTransaksiDto {
     @Transform(({ value }) => typeof value === 'string' ? +value : value)
     harga: number;
 
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsNumber()
+    @Transform(({ value }) => typeof value === 'string' ? +value : value)
+    biayaLayanan?: number;
+
     @ApiProperty()
     @IsNotEmpty()
     @IsNumber()

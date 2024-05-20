@@ -80,6 +80,19 @@ export class Transaksi extends Model<Transaksi>  {
     harga: number;
 
     @Column({
+        type: DataType.BIGINT,
+        allowNull: true,
+    })
+    diskon?: number;
+
+    @Column({
+        type: DataType.BIGINT,
+        allowNull: true,
+        field: 'biaya_layanan'
+    })
+    biayaLayanan?: number;
+
+    @Column({
         type: DataType.DOUBLE,
         allowNull: false,
     })

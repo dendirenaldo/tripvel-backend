@@ -100,24 +100,37 @@ export class PromoService {
 
     async create(data: InsertPromoDto): Promise<Promo> {
         const { tujuanId, ...filteredData } = data;
-        return await this.promoRepository.create({ ...filteredData }, { raw: true }).then((res) => {
-            return Promise.all(
-                tujuanId.map(async (val) => {
-                    await this.promoListRepository.create({
-                        promoId: res.id,
-                        tujuanId: val
+        return await this.promoRepository.create({ ...filteredData }, { raw: true }).then(async (res) => {
+            if (tujuanId !== undefined && tujuanId.length > 0) {
+                return Promise.all(
+                    tujuanId.map(async (val) => {
+                        await this.promoListRepository.create({
+                            promoId: res.id,
+                            tujuanId: val
+                        })
                     })
-                })
-            ).then(async () => await this.promoRepository.findByPk(res.id, {
-                include: [{
-                    model: PromoList,
-                    as: 'promoList',
+                ).then(async () => await this.promoRepository.findByPk(res.id, {
                     include: [{
-                        model: Tujuan,
-                        as: 'tujuan'
+                        model: PromoList,
+                        as: 'promoList',
+                        include: [{
+                            model: Tujuan,
+                            as: 'tujuan'
+                        }]
                     }]
-                }]
-            }));
+                }));
+            } else {
+                return await this.promoRepository.findByPk(res.id, {
+                    include: [{
+                        model: PromoList,
+                        as: 'promoList',
+                        include: [{
+                            model: Tujuan,
+                            as: 'tujuan'
+                        }]
+                    }]
+                });
+            }
         });
     }
 

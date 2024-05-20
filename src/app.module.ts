@@ -16,6 +16,7 @@ import { BankAccountModule } from './bank-account/bank-account.module';
 import { TransaksiModule } from './transaksi/transaksi.module';
 import { BantuanModule } from './bantuan/bantuan.module';
 import { MobilModule } from './mobil/mobil.module';
+import { KursiTerisiModule } from './kursi-terisi/kursi-terisi.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { MobilModule } from './mobil/mobil.module';
     JadwalModule,
     BankAccountModule,
     TransaksiModule,
+    KursiTerisiModule,
   ],
 })
 export class AppModule { }

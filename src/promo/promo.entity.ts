@@ -34,11 +34,24 @@ export class Promo extends Model<Promo>  {
     tanggalBerlaku: Date;
 
     @Column({
+        type: DataType.DATEONLY,
+        allowNull: true,
+        field: 'tanggal_berlaku_hingga'
+    })
+    tanggalBerlakuHingga?: Date;
+
+    @Column({
         type: DataType.BIGINT,
         allowNull: false,
         field: 'minimal_harga'
     })
     minimalHarga: number;
+
+    @Column({
+        type: DataType.BIGINT,
+        allowNull: false,
+    })
+    diskon: number;
 
     @Column({
         type: DataType.DATE,

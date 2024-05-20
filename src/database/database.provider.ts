@@ -9,6 +9,7 @@ import { Berita } from 'src/berita/berita.entity';
 import { Jadwal } from 'src/jadwal/jadwal.entity';
 import { Kategori } from 'src/kategori/kategori.entity';
 import { Konfigurasi } from 'src/konfigurasi/konfigurasi.entity';
+import { KursiTerisi } from 'src/kursi-terisi/kursi-terisi.entity';
 import { Mobil } from 'src/mobil/mobil.entity';
 import { PromoList } from 'src/promo/promo-list.entity';
 import { Promo } from 'src/promo/promo.entity';
@@ -28,13 +29,21 @@ export const databaseProviders = [
                 username: configService.get<string>('DATABASE_USERNAME', 'root'),
                 password: configService.get<string>('DATABASE_PASSWORD', ''),
                 database: configService.get<string>('DATABASE_NAME', 'project_calegmu'),
+                logging: false,
+                timezone: 'Asia/Jakarta',
                 dialectOptions: {
-                    useUTC: false,
-                    timezone: 'local'
+                    timezone: 'local',
+                    typeCast: function (field, next) {
+                        if (field.type === 'DATETIME' || field.type === 'DATE' || field.type === 'TIMESTAMP') {
+                            const offset = new Date().getTimezoneOffset() * 60000;
+                            return new Date(new Date(field.string()).getTime() - offset);
+                        }
+
+                        return next();
+                    },
                 },
-                timezone: 'Asia/Jakarta'
             });
-            sequelize.addModels([Auth, ResetPassword, Kategori, Berita, Bantuan, Konfigurasi, Travel, Tujuan, Promo, PromoList, Mobil, Jadwal, BankAccount, Transaksi, TransaksiList]);
+            sequelize.addModels([Auth, ResetPassword, Kategori, Berita, Bantuan, Konfigurasi, Travel, Tujuan, Promo, PromoList, Mobil, Jadwal, BankAccount, Transaksi, TransaksiList, KursiTerisi]);
             await sequelize.sync();
             return sequelize;
         },

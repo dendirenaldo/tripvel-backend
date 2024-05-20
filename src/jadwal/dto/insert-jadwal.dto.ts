@@ -1,6 +1,7 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsDateString, IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { ArrayMinSize, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray } from "sequelize-typescript";
 import { JadwalType } from "src/general/jadwal.type";
 
 export class InsertJadwalDto {
@@ -59,4 +60,10 @@ export class InsertJadwalDto {
     @IsNotEmpty()
     @IsEnum(JadwalType)
     tipe: JadwalType;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsString({ each: true })
+    @ArrayMinSize(0)
+    kursiTerisi?: string[];
 }

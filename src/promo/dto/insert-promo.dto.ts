@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { Transform } from "class-transformer";
+import { ArrayMinSize, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class InsertPromoDto {
     @ApiProperty()
@@ -18,11 +18,22 @@ export class InsertPromoDto {
     @IsDateString()
     tanggalBerlaku: Date;
 
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsDateString()
+    tanggalBerlakuHingga?: Date;
+
     @ApiProperty()
     @IsNotEmpty()
     @IsNumber()
     @Transform(({ value }) => typeof value === 'string' ? +value : value)
     minimalHarga: number;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsNumber()
+    @Transform(({ value }) => typeof value === 'string' ? +value : value)
+    diskon: number;
 
     @ApiPropertyOptional()
     @IsOptional()

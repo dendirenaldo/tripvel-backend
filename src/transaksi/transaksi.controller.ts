@@ -76,10 +76,10 @@ export class TransaksiController {
     @UseGuards(AuthGuard('jwt'))
     @Put('batalkan/:id')
     batal(@Param('id') id: string, @Req() { user }: any) {
-        if (user.role === 'Pelanggan') {
-            return this.transaksiService.batal(+id, +user.id);
+        if (user.role !== 'Supir') {
+            return this.transaksiService.batal(+id, user);
         } else {
-            throw new ForbiddenException('Only pelanggan can access this endpoint.')
+            throw new ForbiddenException('Only administrator, travel, or pelanggan can access this endpoint.')
         }
     }
 
