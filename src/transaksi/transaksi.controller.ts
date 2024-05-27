@@ -2,7 +2,7 @@ import { Body, Controller, Delete, FileTypeValidator, ForbiddenException, Get, M
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { TransaksiService } from './transaksi.service';
-import { InsertTransaksiDto, QueryTransaksiDto, UploadBuktiPembayaranDto } from './dto';
+import { ChangeStatusPenjemputanDto, InsertTransaksiDto, QueryTransaksiDto, UploadBuktiPembayaranDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
@@ -92,6 +92,17 @@ export class TransaksiController {
     //         throw new ForbiddenException('Only administrator can access this endpoint.')
     //     }
     // }
+
+
+    @UseGuards(AuthGuard('jwt'))
+    @Put('change-status-penjemputan/:id')
+    changeStatusPenjemputan(@Param('id') id: string, @Req() { user }: any, @Body() data: ChangeStatusPenjemputanDto) {
+        if (user.role === 'Supir') {
+            return this.transaksiService.changeStatusPenjemputan(+id, data);
+        } else {
+            throw new ForbiddenException('Only supir can access this endpoint.')
+        }
+    }
 
     @UseGuards(AuthGuard('jwt'))
     @Delete('list/:transaksiListId')

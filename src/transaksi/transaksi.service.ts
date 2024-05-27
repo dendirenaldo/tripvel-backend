@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { Transaksi } from './transaksi.entity';
-import { InsertTransaksiDto, QueryTransaksiDto } from './dto';
+import { ChangeStatusPenjemputanDto, InsertTransaksiDto, QueryTransaksiDto } from './dto';
 import { Op, Order, QueryTypes } from 'sequelize';
 import { FindAllTransaksiInterface } from './interface';
 import { TransaksiList } from './transaksi-list.entity';
@@ -213,15 +213,15 @@ export class TransaksiService {
                     model: Tujuan,
                     as: 'tujuan',
                     attributes: ['id', 'namaSingkatan', 'namaLengkap', 'latitude', 'longitude']
-                }, {
-                    model: Auth,
-                    as: 'supir',
-                    attributes: ['id', 'namaLengkap', 'latitude', 'longitude', 'gambar']
                 }]
             }, {
                 model: BankAccount,
                 as: 'bankAccount',
                 attributes: ['id', 'namaBank', 'nomorRekening', 'namaPemilik']
+            }, {
+                model: Auth,
+                as: 'user',
+                attributes: ['id', 'namaLengkap', 'nomorPonsel', 'gambar']
             }]
         });
 
@@ -325,6 +325,10 @@ export class TransaksiService {
     //     }))
 
     // }
+
+    async changeStatusPenjemputan(id: number, data: ChangeStatusPenjemputanDto) {
+        return await this.transaksiRepository.update(data, { where: { id } }).then(async (res) => await this.findOne(id));
+    }
 
     async deleteTransaksiList(transaksiListId: number): Promise<TransaksiList> {
         const transaksiList = await this.transaksiListRepository.findOne({ where: { id: transaksiListId } });

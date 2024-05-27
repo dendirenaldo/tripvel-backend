@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AccountService } from './account.service';
 import { Observable, of } from 'rxjs';
 import path, { extname, join } from 'path';
-import { ChangePasswordDto, ChangePhotoProfileDto, ChangeProfileDto, InsertAccountDto } from './dto';
+import { ChangeLocationDto, ChangePasswordDto, ChangePhotoProfileDto, ChangeProfileDto, InsertAccountDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
@@ -125,6 +125,16 @@ export class AccountController {
     @Put('change-password')
     changePassword(@Body() data: ChangePasswordDto, @Req() { user }: any) {
         return this.accountService.changePassword(data, user.id)
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Put('change-location')
+    async changeLocation(@Body() data: ChangeLocationDto, @Req() { user }: any) {
+        if (user.role === RoleType.Supir) {
+            return this.accountService.changeLocation(+user.id, data);
+        } else {
+            throw new ForbiddenException('Only supir can access this endpoint.')
+        }
     }
 
     @UseGuards(AuthGuard('jwt'))

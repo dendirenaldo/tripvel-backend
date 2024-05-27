@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { Auth } from 'src/auth/auth.entity';
-import { ChangePasswordDto, ChangeProfileDto, InsertAccountDto } from './dto';
+import { ChangeLocationDto, ChangePasswordDto, ChangeProfileDto, InsertAccountDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt'
 import { MailService } from 'src/mail/mail.service';
@@ -172,7 +172,7 @@ export class AccountService {
     }
 
     async findOne(userId: number, user: any): Promise<Auth> {
-        return this.authRepository.findOne({
+        return await this.authRepository.findOne({
             where: {
                 id: userId,
                 ...(user.role === 'Travel' && {
@@ -296,5 +296,16 @@ export class AccountService {
                 console.error(err);
             }
         }
+    }
+
+    async changeLocation(userId: number, data: ChangeLocationDto): Promise<Auth> {
+        return await this.authRepository.update(data, { where: { id: userId } }).then(async (res) => await this.authRepository.findOne({
+            where: {
+                id: userId,
+            },
+            attributes: {
+                exclude: ['password']
+            },
+        }))
     }
 }
